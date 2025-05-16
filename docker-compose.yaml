@@ -10,6 +10,10 @@ services:
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
       - SQL_RESTORE_ON_START=${SQL_RESTORE_ON_START}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
     ports:
       - "${SQLSERVER_HISTORIC_PORT}:1433"
     labels:
@@ -22,12 +26,16 @@ services:
      - mydefaultstack
 
   sqlserver_current:
-    image: ${SQLSERVER_CURRENT_IMAGE}
+#    image: ${SQLSERVER_CURRENT_IMAGE}
+    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}:${STACK_VERSION}
     container_name: ${STACK_NAME:-defstack}_${SQLSERVER_CURRENT_NAME}
+    # environment:
+    #   - SA_PASSWORD=${SA_PASSWORD}
+    #   - ACCEPT_EULA=Y
+    #   - MSSQL_PID=Developer
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
-      - ACCEPT_EULA=Y
-      - MSSQL_PID=Developer
+      - SQL_RESTORE_ON_START=false  # disables restore script
     ports:
       - "${SQLSERVER_CURRENT_PORT}:1433"
     labels:

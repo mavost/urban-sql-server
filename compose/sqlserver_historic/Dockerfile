@@ -23,4 +23,11 @@ RUN apt-get update && apt-get install -y curl \
 COPY restore-databases.sh /usr/src/app/restore-databases.sh
 RUN chmod +x /usr/src/app/restore-databases.sh
 
-CMD /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 30 && if [ \"$SQL_RESTORE_ON_START\" = \"true\" ]; then /usr/src/app/restore-databases.sh; fi && tail -f /dev/null"
+# Copy optimization script
+COPY optimize-sqlserver.sh /usr/src/app/optimize-sqlserver.sh
+RUN chmod +x /usr/src/app/optimize-sqlserver.sh
+
+CMD /bin/bash -c "/opt/mssql/bin/sqlservr & \
+   sleep 30 && \
+   /usr/src/app/optimize-sqlserver.sh && \
+   if [ \"$SQL_RESTORE_ON_START\" = \"true\" ]; then /usr/src/app/restore-databases.sh; fi && tail -f /dev/null"
