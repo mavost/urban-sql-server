@@ -5,7 +5,7 @@ services:
       context: ./compose/sqlserver_historic
       args:
        - BASEIMAGE=${SQLSERVER_HISTORIC_IMAGE}
-    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}:${STACK_VERSION}
+    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}
     container_name: ${STACK_NAME:-defstack}_${SQLSERVER_HISTORIC_NAME}
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
@@ -19,15 +19,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.sqlserver_historic.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.sqlserver_historic.entrypoints=mssql"
-      - "traefik.tcp.routers.sqlserver_historic.service=sqlserver_historic-svc"
-      - "traefik.tcp.services.sqlserver_historic-svc.loadbalancer.server.port=1433"
+      - "traefik.tcp.routers.sqlserver_historic.entrypoints=sqlserver"
+      - "traefik.tcp.routers.sqlserver_historic.service=${SQLSERVER_HISTORIC_NAME}"
+      - "traefik.tcp.services.sqlserver_historic.loadbalancer.server.port=1433"
     networks:
      - mydefaultstack
 
   sqlserver_current:
 #    image: ${SQLSERVER_CURRENT_IMAGE}
-    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}:${STACK_VERSION}
+    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}
     container_name: ${STACK_NAME:-defstack}_${SQLSERVER_CURRENT_NAME}
     # environment:
     #   - SA_PASSWORD=${SA_PASSWORD}
@@ -41,9 +41,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.sqlserver_current.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.sqlserver_current.entrypoints=mssql"
-      - "traefik.tcp.routers.sqlserver_current.service=sqlserver_current-svc"
-      - "traefik.tcp.services.sqlserver_current-svc.loadbalancer.server.port=1433"
+      - "traefik.tcp.routers.sqlserver_current.entrypoints=sqlserver"
+      - "traefik.tcp.routers.sqlserver_current.service=${SQLSERVER_CURRENT_NAME}"
+      - "traefik.tcp.services.sqlserver_current.loadbalancer.server.port=1433"
     networks:
      - mydefaultstack
 
