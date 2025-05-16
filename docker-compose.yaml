@@ -1,35 +1,44 @@
-# a sample compose file
 version: '3'
 services:
-  alpine:
+  sqlserver_historic:
     build:
-      context: ./compose/refined_image
+      context: ./compose/sqlserver_historic
       args:
-       - BASEIMAGE=${FIRST_BASE_IMAGE}
-    image: ${FIRST_REFINED_IMAGE_ROOT}:${STACK_VERSION}
-    container_name: ${STACK_NAME:-defstack}_alpine
-    ports:
-     - 8080:5000
-    networks:
-     - mydefaultstack
+       - BASEIMAGE=${SQLSERVER_HISTORIC_IMAGE}
+    image: ${SQLSERVER_HISTORIC_IMAGE_ROOT}:${STACK_VERSION}
+    container_name: ${STACK_NAME:-defstack}_${SQLSERVER_HISTORIC_NAME}
     environment:
-     - EXAMPLE_VAR_VERBOSE=true
-     - FLASK_DEBUG=1
-     - FLASK_APP=app.py
-     - FLASK_RUN_HOST=0.0.0.0
-    volumes:
-     - ./compose/refined_image/code:/code
-    depends_on:
-     - redis
-  redis:
-    image: "redis:alpine"
-    container_name: ${STACK_NAME:-defstack}_redis
-#    ports:
-#     - 6379:6379
-#    volumes:
-#      - persistent_data:/persistent_data
+      - SA_PASSWORD=${SA_PASSWORD}
+      - SQL_RESTORE_ON_START=${SQL_RESTORE_ON_START}
+    ports:
+      - "${SQLSERVER_HISTORIC_PORT}:1433"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.sqlserver_historic.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.sqlserver_historic.entrypoints=mssql"
+      - "traefik.tcp.routers.sqlserver_historic.service=sqlserver_historic-svc"
+      - "traefik.tcp.services.sqlserver_historic-svc.loadbalancer.server.port=1433"
     networks:
      - mydefaultstack
+
+  sqlserver_current:
+    image: ${SQLSERVER_CURRENT_IMAGE}
+    container_name: ${STACK_NAME:-defstack}_${SQLSERVER_CURRENT_NAME}
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+    ports:
+      - "${SQLSERVER_CURRENT_PORT}:1433"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.sqlserver_current.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.sqlserver_current.entrypoints=mssql"
+      - "traefik.tcp.routers.sqlserver_current.service=sqlserver_current-svc"
+      - "traefik.tcp.services.sqlserver_current-svc.loadbalancer.server.port=1433"
+    networks:
+     - mydefaultstack
+
 
 volumes:
   persistent_data:
@@ -38,4 +47,4 @@ volumes:
 networks:
   mydefaultstack:
     name: mydefaultstack
-#    external: true
+    external: true
