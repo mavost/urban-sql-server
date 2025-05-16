@@ -51,3 +51,10 @@ If SQL_RESTORE_ON_START is enabled, the following databases will be restored in 
     WideWorldImportersDW
 
 You can also exec into the container and run /usr/src/app/restore-databases.sh manually.
+
+On my machine the database restoration and upgrading on the historic instance takes about 15 min.
+
+### ToDos
+
+- add volumes for data persistence
+- further tweaks for performance optimization
